@@ -1,0 +1,19 @@
+* Org-doc-noter
+Yet another synchronized document annotator.
+* Installation
+** Use package.el
+~M-x package-vc-install RET https://github.com/Elilif/org-doc-noter RET~
+** Manually
+#+begin_src elisp
+  (add-to-list 'load-path "path-to-org-doc-noter")
+  (require 'org-doc-noter)
+#+end_src
+* Usage
+| Commands                        | Description                                                              |
+|---------------------------------+--------------------------------------------------------------------------|
+| =org-doc-noter=                   | Start a org-doc-noter session.                                           |
+| =org-doc-noter-kill-session=      | Kill an org-doc-noter session.                                           |
+| =org-doc-noter-insert-note=       | Insert note associated with the current location.                        |
+| =org-doc-noter-sync-current-page= | Go the location of the selected note, in relation to where the point is. |
+| =org-doc-noter-sync-next-page=    | Show next page that has notes.                                           |
+| =org-doc-noter-sync-prev-page=    | Show previous page that has notes.                                       |
