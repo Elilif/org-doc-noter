@@ -30,12 +30,20 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'outline)
 (require 'info)
+(require 'org)
+(require 'org-element)
 
 (declare-function doc-view-goto-page "doc-view")
 (declare-function doc-view-fit-width-to-window "doc-view")
+(declare-function image-mode-window-get "image-mode")
 (declare-function pdf-view-goto-page "ext:pdf-view")
 (declare-function pdf-view-fit-width-to-window "ext:pdf-view")
+(declare-function pdf-view-mode "ext:pdf-view")
+(declare-function nov-goto-document "ext:nov")
+(defvar nov-documents-index)
+(defvar org-doc-noter-doc-mode)
 
 
 ;;;; customiations
