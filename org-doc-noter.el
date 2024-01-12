@@ -85,6 +85,11 @@ that the document window will occupy when split."
   :group 'org-doc-noter
   :type 'directory)
 
+(defcustom org-doc-noter-info-buffer-name "*info-doc*"
+  "Default buffer name for Info document mode."
+  :group 'org-doc-noter
+  :type 'string)
+
 (defcustom org-doc-noter-note-name-functions
   '((Info-mode . org-doc-noter-note-name-info)
     (pdf-view-mode . org-doc-noter-note-name-default)
@@ -334,8 +339,8 @@ Set prev-notes, current-notes and after notes in
 If BUFFER is a Info buffer and FILE-PATH is supplied, create a
 new buffer instead."
   (let* ((base-buffer (or (buffer-base-buffer buffer) buffer))
-         (result (if (string= (buffer-name buffer) "*info*")
-                     (let ((info-buffer (get-buffer-create "*info-doc*")))
+         (result (if (eq (buffer-local-value 'major-mode base-buffer) 'Info-mode)
+                     (let ((info-buffer (get-buffer-create org-doc-noter-info-buffer-name)))
                        (with-current-buffer info-buffer
                          (info-setup file-path info-buffer))
                        info-buffer)
