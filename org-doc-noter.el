@@ -110,6 +110,19 @@ This value should be a number between 0 and 1."
   :group 'org-doc-noter
   :type '(number :tag "Horizontal fraction"))
 
+(defcustom org-doc-noter-highlight-selected-text t
+  "When non-nil, append selected text to existing note."
+  :group 'org-doc-noter
+  :type 'boolean)
+
+(defcustom org-doc-noter-insert-selected-text t
+  "When nont-nil, highlight the selected text in the doucment buffer.
+
+Notice that this option does not work in `pdf-view-mode' or
+`doc-view-mode'."
+  :group 'org-doc-noter
+  :type 'boolean)
+
 (defface org-doc-noter-midline
   '((t (:underline (:color "purple" :style line
                            :position 3))))
@@ -739,8 +752,8 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
 (defun org-doc-noter-insert-note ()
   "Insert note associated with the current location.
 
-When you have text selected on the document buffer, the text
-should be inserted inside the note."
+See `org-doc-noter-highlight-selected-text' and
+`org-doc-noter-insert-selected-text' for details."
   (interactive)
   (org-doc-noter-update-note-ast)
   (let* ((current-notes (org-doc-noter-session-current-notes
@@ -802,10 +815,13 @@ should be inserted inside the note."
       (org-entry-put nil org-doc-noter-property-note-location
                      (prin1-to-string loc)))
 
-    (when (and remark-prop
-               selected-text)
+    (when (and org-doc-noter-highlight-selected-text
+               remark-prop)
       (org-entry-put nil org-doc-noter-property-note-remark remark-prop)
-      (org-entry-put nil org-doc-noter-property-note-remark-hash (sha1 selected-text))
+      (org-entry-put nil org-doc-noter-property-note-remark-hash (sha1 selected-text)))
+
+    (when (and org-doc-noter-insert-selected-text
+               selected-text)
       (save-excursion
         (insert "\n#+BEGIN_QUOTE\n" selected-text "\n#+END_QUOTE")))
 
