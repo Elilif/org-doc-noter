@@ -472,7 +472,7 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
          (note-buffer (org-doc-noter-session-note-buffer session)))
     (delete-other-windows)
     (set-window-buffer doc-window doc-buffer)
-    ;; (set-window-dedicated-p doc-window t)
+    (set-window-dedicated-p doc-window t)
 
     (set-window-buffer (split-window-right
                         (ceiling (* (org-doc-noter-session-split-fraction session)
