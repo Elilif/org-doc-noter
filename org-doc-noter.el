@@ -798,6 +798,7 @@ See `org-doc-noter-highlight-selected-text' and
     (goto-char pos)
     (if append?
         (progn
+          (unless (bolp) (insert "\n"))
           (org-N-empty-lines-before-current 2)
           (forward-line -1)
           (org-fold-show-set-visibility 'minimal))
