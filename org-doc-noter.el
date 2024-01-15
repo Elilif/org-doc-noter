@@ -352,16 +352,23 @@ Set prev-notes, current-notes and after notes in
 If BUFFER is a Info buffer and FILE-PATH is supplied, create a
 new buffer instead."
   (let* ((base-buffer (or (buffer-base-buffer buffer) buffer))
-         (result (if (eq (buffer-local-value 'major-mode base-buffer) 'Info-mode)
-                     (let ((info-buffer (generate-new-buffer org-doc-noter-info-buffer-name)))
-                       (with-current-buffer info-buffer
-                         (info-setup file-path info-buffer))
-                       info-buffer)
+         (result (cond
+                  ;; reuse `*info-doc*' buffer if call `org-doc-noter' in that
+                  ;; buffer
+                  ((and (eq (buffer-local-value 'major-mode buffer) 'Info-mode)
+                        org-doc-noter-doc-mode)
+                   (current-buffer))
+                  ((eq (buffer-local-value 'major-mode base-buffer) 'Info-mode)
+                   (let ((info-buffer (generate-new-buffer org-doc-noter-info-buffer-name)))
+                     (with-current-buffer info-buffer
+                       (info-setup file-path info-buffer))
+                     info-buffer))
+                  (t
                    (make-indirect-buffer
                     base-buffer
                     (generate-new-buffer-name
                      (concat name "-" (buffer-name base-buffer)))
-                    t t))))
+                    t t)))))
     (with-current-buffer result
       (pcase major-mode
         ('pdf-view-mode
@@ -613,7 +620,7 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
               (orig-info (org-doc-noter-session-doc-path org-doc-noter-session)))
     (unless (or (Info-virtual-file-p current-info)
                 (string= current-info orig-info))
-      (org-doc-noter-kill-session)
+      (org-doc-noter-kill-session t)
       (org-doc-noter)))
   (when (or (< (window-start) org-doc-noter--window-start)
             (> (window-end nil t) org-doc-noter--window-end))
@@ -632,8 +639,11 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
 
 (defun org-doc-noter--handler (&rest _args)
   (when org-doc-noter-doc-mode
-    (setf (org-doc-noter-session-doc-loc org-doc-noter-session)
-          (org-doc-noter--get-doc-location))
+    (when (and (ignore-errors (org-doc-noter--get-doc-file))
+               (string= (org-doc-noter--get-doc-file)
+                        (org-doc-noter-session-doc-path org-doc-noter-session)))
+      (setf (org-doc-noter-session-doc-loc org-doc-noter-session)
+            (org-doc-noter--get-doc-location)))
     (pcase major-mode
       ((or 'pdf-view-mode 'doc-view-mode)
        (org-doc-noter-pdf-handler))
@@ -735,7 +745,7 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
 Each function takes one argument: prefix arg in raw form.")
 
 ;;;###autoload
-(defun org-doc-noter-kill-session ()
+(defun org-doc-noter-kill-session (&optional keep-doc-buffer)
   "Kill an `org-doc-noter' session."
   (interactive)
   (when org-doc-noter-session
@@ -747,8 +757,11 @@ Each function takes one argument: prefix arg in raw form.")
       (kill-buffer note-buffer)
       (org-doc-noter-with-doc-buffer
         (delete-other-windows)
-        (org-doc-noter-doc-mode -1)
-        (kill-buffer)))))
+        (set-window-dedicated-p (selected-window) nil)
+        (setq org-doc-noter-session nil)
+        (unless keep-doc-buffer
+          (org-doc-noter-doc-mode -1)
+          (kill-buffer))))))
 
 ;;;###autoload
 (defun org-doc-noter-insert-note (&optional arg)
