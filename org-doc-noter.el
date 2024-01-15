@@ -353,7 +353,7 @@ If BUFFER is a Info buffer and FILE-PATH is supplied, create a
 new buffer instead."
   (let* ((base-buffer (or (buffer-base-buffer buffer) buffer))
          (result (if (eq (buffer-local-value 'major-mode base-buffer) 'Info-mode)
-                     (let ((info-buffer (get-buffer-create org-doc-noter-info-buffer-name)))
+                     (let ((info-buffer (generate-new-buffer org-doc-noter-info-buffer-name)))
                        (with-current-buffer info-buffer
                          (info-setup file-path info-buffer))
                        info-buffer)
@@ -735,9 +735,9 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
 Each function takes one argument: prefix arg in raw form.")
 
 ;;;###autoload
-(defun org-doc-noter-kill-session (&optional kill)
+(defun org-doc-noter-kill-session ()
   "Kill an `org-doc-noter' session."
-  (interactive "P")
+  (interactive)
   (when org-doc-noter-session
     (let ((note-buffer (org-doc-noter-session-note-buffer org-doc-noter-session)))
       (when (memq org-doc-noter-session org-doc-noter-sessions)
@@ -748,9 +748,7 @@ Each function takes one argument: prefix arg in raw form.")
       (org-doc-noter-with-doc-buffer
         (delete-other-windows)
         (org-doc-noter-doc-mode -1)
-        (if (eq major-mode 'Info-mode)
-            (quit-window kill)
-          (kill-buffer))))))
+        (kill-buffer)))))
 
 ;;;###autoload
 (defun org-doc-noter-insert-note (&optional arg)
