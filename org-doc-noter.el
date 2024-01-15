@@ -611,11 +611,18 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
         org-doc-noter--window-start (window-start)))
 
 (defun org-doc-noter-pdf-handler ()
+  (setf (org-doc-noter-session-doc-loc org-doc-noter-session)
+        (org-doc-noter--get-doc-location))
   (org-doc-noter-note-highlight)
 
   (run-hooks 'org-doc-noter-pdf-handler-hook))
 
 (defun org-doc-noter-info-handler ()
+  (when (and (not (Info-virtual-file-p Info-current-file))
+             (string= Info-current-file
+                      (org-doc-noter-session-doc-path org-doc-noter-session)))
+    (setf (org-doc-noter-session-doc-loc org-doc-noter-session)
+          (org-doc-noter--get-doc-location)))
   (when-let* ((current-info Info-current-file)
               (orig-info (org-doc-noter-session-doc-path org-doc-noter-session)))
     (unless (or (Info-virtual-file-p current-info)
@@ -630,6 +637,8 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
     (run-hooks 'org-doc-noter-info-handler-hook)))
 
 (defun org-doc-noter-nov-handler ()
+  (setf (org-doc-noter-session-doc-loc org-doc-noter-session)
+        (org-doc-noter--get-doc-location))
   (when (or (< (window-start) org-doc-noter--window-start)
             (> (window-end nil t) org-doc-noter--window-end))
     (org-doc-noter--set-window-info)
@@ -639,11 +648,6 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
 
 (defun org-doc-noter--handler (&rest _args)
   (when org-doc-noter-doc-mode
-    (when (and (ignore-errors (org-doc-noter--get-doc-file))
-               (string= (org-doc-noter--get-doc-file)
-                        (org-doc-noter-session-doc-path org-doc-noter-session)))
-      (setf (org-doc-noter-session-doc-loc org-doc-noter-session)
-            (org-doc-noter--get-doc-location)))
     (pcase major-mode
       ((or 'pdf-view-mode 'doc-view-mode)
        (org-doc-noter-pdf-handler))
