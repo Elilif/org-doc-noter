@@ -729,6 +729,10 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
       (org-doc-noter-notes-mode-setup)))
 
 ;;;; interactive functions
+(defvar org-doc-noter-insert-heading-hook nil
+  "Hook run after inserting a new heading.
+
+Each function takes one argument: prefix arg in raw form.")
 
 ;;;###autoload
 (defun org-doc-noter-kill-session (&optional kill)
@@ -749,12 +753,12 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
           (kill-buffer))))))
 
 ;;;###autoload
-(defun org-doc-noter-insert-note ()
+(defun org-doc-noter-insert-note (&optional arg)
   "Insert note associated with the current location.
 
 See `org-doc-noter-highlight-selected-text' and
 `org-doc-noter-insert-selected-text' for details."
-  (interactive)
+  (interactive "P")
   (org-doc-noter-update-note-ast)
   (let* ((current-notes (org-doc-noter-session-current-notes
                          org-doc-noter-session))
@@ -825,6 +829,8 @@ See `org-doc-noter-highlight-selected-text' and
                selected-text)
       (save-excursion
         (insert "\n#+BEGIN_QUOTE\n" selected-text "\n#+END_QUOTE")))
+
+    (run-hook-with-args 'org-doc-noter-insert-heading-hook arg)
 
     (outline-show-entry)
     (org-cycle-hide-drawers 'all))
