@@ -372,7 +372,8 @@ new buffer instead."
     (with-current-buffer result
       (pcase major-mode
         ('pdf-view-mode
-         (pdf-view-mode))))
+         (pdf-view-mode)
+         (setq buffer-file-name file-path))))
     result))
 
 (defun org-doc-noter-get-doc-info ()
