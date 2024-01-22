@@ -46,7 +46,7 @@
 (defvar org-doc-noter-doc-mode)
 
 
-;;;; customiations
+;;;; customizations
 
 (defgroup org-doc-noter nil
   "Highlight and annotate documents using Org mode."
@@ -388,7 +388,10 @@ The result is a vector: [BUFFER FILE MODE LOCATION]."
            (doc-buffer (org-doc-noter-make-indirect-buffer
                         (if (member (file-name-directory file-path)
                                     Info-directory-list)
-                            (get-buffer-create "*info*")
+                            (let ((info-buffer (get-buffer-create "*info*")))
+                              (with-current-buffer info-buffer
+                                (Info-mode)
+                                info-buffer))
                           (find-file-noselect file-path))
                         "Doc" file-path))
            (doc-loc (org-doc-noter--parse-property
