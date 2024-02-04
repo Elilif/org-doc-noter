@@ -181,7 +181,10 @@ doc window."
   (declare (indent defun) (debug t))
   `(when org-doc-noter-session
      (let ((note-buffer (org-doc-noter-session-note-buffer org-doc-noter-session)))
-       (with-selected-window (get-buffer-window note-buffer)
+       (if-let ((window (get-buffer-window note-buffer)))
+           (with-selected-window (get-buffer-window note-buffer)
+             (with-current-buffer note-buffer
+               ,@body))
          (with-current-buffer note-buffer
            ,@body)))))
 
@@ -190,7 +193,10 @@ doc window."
   (declare (indent defun) (debug t))
   `(when org-doc-noter-session
      (let ((doc-buffer (org-doc-noter-session-doc-buffer org-doc-noter-session)))
-       (with-selected-window (get-buffer-window doc-buffer)
+       (if-let ((window (get-buffer-window doc-buffer)))
+           (with-selected-window (get-buffer-window doc-buffer)
+             (with-current-buffer doc-buffer
+               ,@body))
          (with-current-buffer doc-buffer
            ,@body)))))
 
