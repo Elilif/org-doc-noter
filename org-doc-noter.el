@@ -518,6 +518,12 @@ MOD-TICK is BUFFER's tick counter returned by `buffer-modified-tick'."
       (insert (concat "* " doc-name "\n"))
       (org-entry-put nil org-doc-noter-property-doc-file doc-path))))
 
+(defun org-doc-noter-adjust-headline-level ()
+  (let* ((root-level (org-doc-noter-session-level org-doc-noter-session))
+         (current-level (org-current-level))
+         (diff (- (1+ root-level) current-level))
+         (changer (if (> diff 0) 'org-do-demote 'org-do-promote)))
+    (dotimes (_ (abs diff)) (funcall changer))))
 
 ;;;; highlights
 
@@ -837,11 +843,7 @@ See `org-doc-noter-highlight-selected-text' and
       (org-end-of-subtree)
       (unless (bolp) (insert "\n"))
 
-      (let* ((root-level (org-doc-noter-session-level org-doc-noter-session))
-             (current-level (org-current-level))
-             (diff (- (1+ root-level) current-level))
-             (changer (if (> diff 0) 'org-do-demote 'org-do-promote)))
-        (dotimes (_ (abs diff)) (funcall changer)))
+      (org-doc-noter-adjust-headline-level)
       (org-entry-put nil org-doc-noter-property-note-location
                      (prin1-to-string loc)))
 
