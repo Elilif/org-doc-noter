@@ -318,13 +318,15 @@ Set prev-notes, current-notes and after notes in
           previous current after)
       (org-element-map ast 'headline
         (lambda (hl)
-          (when-let ((loc (org-doc-noter--parse-property
-                           (org-element-property
-                            (org-doc-noter--get-prop "note-location") hl))))
-            (cond
-             ((org-doc-noter-location= loc current-loc) (push hl current))
-             ((org-doc-noter-location< loc current-loc) (push hl previous))
-             ((org-doc-noter-location> loc current-loc) (push hl after))))))
+          (when (= (+ (org-doc-noter-session-level org-doc-noter-session) 1)
+                   (org-element-property :level hl))
+            (when-let ((loc (org-doc-noter--parse-property
+                             (org-element-property
+                              (org-doc-noter--get-prop "note-location") hl))))
+              (cond
+               ((org-doc-noter-location= loc current-loc) (push hl current))
+               ((org-doc-noter-location< loc current-loc) (push hl previous))
+               ((org-doc-noter-location> loc current-loc) (push hl after)))))))
       (setf (org-doc-noter-session-prev-notes org-doc-noter-session) previous
             (org-doc-noter-session-current-notes org-doc-noter-session) (reverse current)
             (org-doc-noter-session-after-notes org-doc-noter-session) (reverse after)))))
